@@ -1,0 +1,58 @@
+plugins {
+    id 'scala'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+    id "com.diffplug.gradle.spotless" version "3.13.0"
+}
+
+group = 'pro.civitaspo'
+version = '0.0.1'
+
+def scalaSemanticVersion = "2.12.6"
+def depScalaVersion = "2.12"
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url 'https://dl.bintray.com/digdag/maven'
+    }
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.scala-lang/scala-library
+    compile group: 'org.scala-lang', name: 'scala-library', version: scalaSemanticVersion
+    // https://mvnrepository.com/artifact/org.scala-lang.modules/scala-parser-combinators
+    compile group: 'org.scala-lang.modules', name: "scala-parser-combinators_$depScalaVersion", version: '1.1.1'
+}
+
+shadowJar {
+    classifier = null
+}
+
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
+    }
+    repositories {
+        maven {
+            url "$buildDir/repo"
+        }
+    }
+}
+
+spotless {
+    scala {
+        scalafmt('1.5.1').configFile('.scalafmt.conf')
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileScala.options.encoding = 'UTF-8'
+compileTestScala.options.encoding = 'UTF-8'
+compileScala.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+
